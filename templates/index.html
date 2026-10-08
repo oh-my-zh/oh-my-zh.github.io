@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="{{SITE_NAME}}的作品集，这里发布故事、随笔与杂记。">
+    <title>{{SITE_NAME}}</title>
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="assets/style.css">
+  </head>
+  <body class="home">
+    <header class="site-header">
+      <a class="site-title" href="index.html">{{SITE_NAME}}</a>
+      <nav aria-label="主导航">
+        <a href="index.html">首页</a>
+        <a href="#categories">分类</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero">
+        <p>{{SITE_DESC}}</p>
+      </section>
+
+      <section class="content-section" id="latest">
+        <h2>最新发布</h2>
+        <div class="work-list">
+{{LATEST}}
+        </div>
+      </section>
+
+      <section class="content-section" id="categories">
+        <h2>分类索引</h2>
+        <div class="category-index">
+{{CATEGORIES}}
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      © 2026 {{SITE_NAME}}
+    </footer>
+  </body>
+</html>

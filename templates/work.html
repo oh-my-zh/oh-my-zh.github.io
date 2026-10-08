@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="{{TITLE}} —— {{SITE_NAME}}的一篇作品。">
+    <title>{{TITLE}} · {{SITE_NAME}}</title>
+    <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="../assets/style.css">
+  </head>
+  <body class="work">
+    <header class="site-header">
+      <a class="site-title" href="../index.html">{{SITE_NAME}}</a>
+      <nav aria-label="主导航">
+        <a href="../index.html">首页</a>
+        <a href="../index.html#categories">分类</a>
+      </nav>
+    </header>
+
+    <main>
+      <article class="work-page">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="../index.html">← 返回首页</a>
+        </nav>
+
+        <header class="work-header">
+          <span class="work-meta">
+            <span class="work-date">{{DATE}}</span>
+            <a class="work-cat" href="../index.html#{{CAT_ANCHOR}}">{{CATEGORY}}</a>
+          </span>
+          <h1>{{TITLE}}</h1>
+          <p class="work-summary">{{SUMMARY}}</p>
+        </header>
+
+        <div class="prose">
+{{CONTENT}}
+        </div>
+      </article>
+    </main>
+
+    <footer class="site-footer">
+      © 2026 {{SITE_NAME}}
+    </footer>
+  </body>
+</html>

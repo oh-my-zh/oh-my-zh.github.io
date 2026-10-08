@@ -1,0 +1,296 @@
+:root {
+  color-scheme: light;
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --text: #1f2430;
+  --muted: #6b7280;
+  --line: #e3e6ea;
+  --accent: #3b5bdb;
+  --accent-soft: #e5eafc;
+  --link: #2f49b8;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+    "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  line-height: 1.7;
+}
+
+a {
+  color: var(--link);
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.18em;
+}
+
+.site-header,
+.site-footer,
+main {
+  width: min(100% - 32px, 920px);
+  margin: 0 auto;
+}
+
+.site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 24px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.site-title {
+  color: var(--text);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.site-header nav {
+  display: flex;
+  gap: 16px;
+}
+
+.site-header nav a {
+  color: var(--muted);
+  font-size: 0.95rem;
+  text-decoration: none;
+}
+
+.site-header nav a:hover {
+  color: var(--accent);
+}
+
+.hero {
+  padding: 72px 0 48px;
+}
+
+.eyebrow,
+.work-date {
+  margin: 0 0 8px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.25;
+}
+
+h1 {
+  margin: 0 0 18px;
+  font-size: clamp(2.25rem, 7vw, 4rem);
+}
+
+h2 {
+  margin: 0 0 20px;
+  font-size: 1.5rem;
+}
+
+.hero p:last-child {
+  max-width: 620px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 1.08rem;
+}
+
+.content-section {
+  padding: 32px 0;
+  border-top: 1px solid var(--line);
+}
+
+.work-list {
+  display: grid;
+  gap: 16px;
+}
+
+.work-card {
+  padding: 20px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.work-card h3 {
+  margin: 0 0 8px;
+  font-size: 1.25rem;
+}
+
+.work-card h3 a {
+  color: var(--text);
+  text-decoration: none;
+}
+
+.work-card h3 a:hover {
+  color: var(--accent);
+}
+
+.work-card p {
+  margin: 0 0 12px;
+  color: var(--muted);
+}
+
+.work-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.work-cat {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 0.88rem;
+  text-decoration: none;
+}
+
+.category-index {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.category-group {
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.category-group h3 {
+  margin: 0 0 10px;
+}
+
+.category-group ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.category-group li {
+  margin: 4px 0;
+}
+
+.empty-state {
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+/* 作品正文页 */
+.work-page {
+  max-width: 760px;
+  padding: 48px 0;
+}
+
+.breadcrumb {
+  margin-bottom: 32px;
+}
+
+.breadcrumb a {
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.work-header {
+  margin-bottom: 36px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--line);
+}
+
+.work-header h1 {
+  font-size: clamp(1.55rem, 3.6vw, 2.35rem);
+  margin-bottom: 12px;
+}
+
+.work-header .work-meta {
+  margin-bottom: 12px;
+}
+
+.work-summary {
+  color: var(--muted);
+}
+
+.prose {
+  font-size: 1.05rem;
+  overflow-wrap: break-word;
+}
+
+.prose p {
+  margin: 0 0 1.2em;
+}
+
+.prose img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+.prose blockquote {
+  margin: 24px 0;
+  padding: 12px 18px;
+  border-left: 4px solid var(--accent);
+  border-radius: 0 8px 8px 0;
+  background: var(--accent-soft);
+  color: var(--text);
+}
+
+.prose code {
+  padding: 0.15em 0.3em;
+  border-radius: 4px;
+  background: #e8ebf2;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.9em;
+}
+
+.prose pre {
+  overflow-x: auto;
+  padding: 16px;
+  border-radius: 8px;
+  background: #1a1f2e;
+  color: #f2f4f9;
+}
+
+.prose pre code {
+  padding: 0;
+  background: transparent;
+}
+
+.prose hr {
+  margin: 32px auto;
+  width: 120px;
+  border: none;
+  border-top: 1px solid var(--line);
+}
+
+.site-footer {
+  padding: 36px 0;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+@media (max-width: 640px) {
+  .site-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .hero {
+    padding: 48px 0 32px;
+  }
+
+  .work-card,
+  .category-group {
+    padding: 16px;
+  }
+}
