@@ -75,6 +75,10 @@ def build():
     (OUT_DIR / "works").mkdir(parents=True)
     shutil.copytree(ASSETS_DIR, OUT_DIR / "assets")
 
+    cname = ROOT / "CNAME"
+    if cname.exists():
+        shutil.copy2(cname, OUT_DIR / "CNAME")
+
     index_tpl = (TEMPLATES_DIR / "index.html").read_text(encoding="utf-8")
     work_tpl = (TEMPLATES_DIR / "work.html").read_text(encoding="utf-8")
 
