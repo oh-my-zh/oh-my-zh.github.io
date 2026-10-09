@@ -86,25 +86,53 @@ def extract_plain_text(msg):
 
 
 def parse_fields(body):
-    """从 Web3Forms 正文里解析字段。字段名单独成行，值在下一行起。"""
+    """解析 Web3Forms 正文字段，兼容两种格式：
+    - 'Name\\n值'（字段名单独成行，值在下一行）
+    - 'message  : 值'（字段名和值在同一行）
+    """
     fields = {}
     lines = body.splitlines()
+    n = len(lines)
+    field_re = re.compile(r"^(name|email|message|page)\s*:\s*(.*)$", re.IGNORECASE)
+
     i = 0
-    while i < len(lines):
-        candidate = lines[i].strip().rstrip(":").strip().lower()
+    while i < n:
+        line = lines[i].strip()
+        if not line:
+            i += 1
+            continue
+
+        # 同行格式：message  : 值
+        m = field_re.match(line)
+        if m:
+            key = m.group(1).lower()
+            val = m.group(2).strip()
+            if key not in fields:
+                fields[key] = val
+            i += 1
+            continue
+
+        # 单独成行格式：字段名 + 下一行的值
+        candidate = line.rstrip(":").strip().lower()
         if candidate in FIELD_NAMES:
             value_lines = []
             j = i + 1
-            while j < len(lines):
-                nxt = lines[j].strip().rstrip(":").strip().lower()
-                if nxt in FIELD_NAMES:
+            while j < n:
+                nxt = lines[j].strip()
+                if not nxt:
+                    j += 1
+                    continue
+                if field_re.match(nxt) or nxt.rstrip(":").strip().lower() in FIELD_NAMES:
                     break
-                value_lines.append(lines[j].strip())
+                value_lines.append(nxt)
                 j += 1
-            fields[candidate] = "\n".join(v for v in value_lines if v).strip()
+            if candidate not in fields:
+                fields[candidate] = "\n".join(value_lines).strip()
             i = j
-        else:
-            i += 1
+            continue
+
+        i += 1
+
     return fields
 
 
