@@ -35,10 +35,37 @@
 {{CATEGORIES}}
         </div>
       </section>
+
+      <section class="content-section" id="comment">
+        <h2>留言评论</h2>
+        <p class="comment-hint">写下你的想法，评论会直接发到我的邮箱。</p>
+        <form class="comment-form" id="comment-form" novalidate>
+          <div class="comment-row">
+            <div class="comment-field">
+              <label for="comment-name">昵称</label>
+              <input type="text" id="comment-name" name="name" placeholder="怎么称呼你（可选）" autocomplete="nickname">
+            </div>
+            <div class="comment-field">
+              <label for="comment-email">邮箱</label>
+              <input type="email" id="comment-email" name="email" placeholder="你的邮箱（可选，便于我回复）" autocomplete="email">
+            </div>
+          </div>
+          <div class="comment-field">
+            <label for="comment-message">评论内容</label>
+            <textarea id="comment-message" name="message" rows="5" placeholder="写下你的想法……" required></textarea>
+          </div>
+          <input type="hidden" name="page" value="首页">
+          <input type="checkbox" name="botcheck" class="comment-hp" tabindex="-1" autocomplete="off">
+          <button type="submit" class="comment-submit">发送评论</button>
+          <p class="comment-status" role="status" aria-live="polite"></p>
+        </form>
+      </section>
     </main>
 
     <footer class="site-footer">
       © 2026 {{SITE_NAME}}
     </footer>
+
+    <script src="assets/comment.js" defer></script>
   </body>
 </html>
