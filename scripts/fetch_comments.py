@@ -15,6 +15,7 @@
 「Google 账号 → 安全 → 应用专用密码」为「邮件」生成 16 位应用专用密码。
 """
 import base64
+import datetime
 import email
 import email.utils
 import hashlib
@@ -217,6 +218,18 @@ def should_search(folder):
     return "spam" in low or "junk" in low or "垃圾" in name
 
 
+# 英文月份缩写（IMAP SINCE 搜索要求英文缩写，避免受系统 locale 影响）
+_MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+           "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+_RECENT_DAYS = 30  # 只拉取最近多少天内的评论邮件
+
+
+def since_date(days=_RECENT_DAYS):
+    """返回 days 天前的日期，格式 dd-Mon-yyyy（IMAP SINCE 用）。"""
+    d = datetime.date.today() - datetime.timedelta(days=days)
+    return f"{d.day:02d}-{_MONTHS[d.month - 1]}-{d.year}"
+
+
 def main():
     mark_read = "--mark-read" in sys.argv
     mail_addr, auth_code = load_config()
@@ -242,9 +255,11 @@ def main():
             if status != "OK":
                 continue
 
-            # 优先查未读，为空则查全部（靠 Message-ID 去重避免重复）
-            status, data = mail.search(None, "UNSEEN")
+            # 只搜最近 30 天的邮件（不限已读未读）
+            since = since_date()
+            status, data = mail.search(None, f'(SINCE "{since}")')
             if status != "OK" or not data or not data[0]:
+                # 兜底：SINCE 失败则退回全部
                 status, data = mail.search(None, "ALL")
             if status != "OK" or not data:
                 continue
