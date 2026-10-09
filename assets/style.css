@@ -344,8 +344,9 @@ h2 {
 }
 
 .comment-form textarea {
+  width: 100%;
   resize: vertical;
-  min-height: 120px;
+  min-height: 200px;
 }
 
 .comment-hp {
