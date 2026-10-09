@@ -73,3 +73,24 @@ python3 -m http.server 8000 --directory _site
 ## 修改分类
 
 分类在 [build.py](scripts/build.py) 顶部的 `CATEGORIES` 列表里定义。若要增删分类，改那里即可，首页「分类索引」会自动跟着变。
+
+## 评论功能
+
+访客在首页「留言」或作品页「评论」提交的内容，会通过 [Web3Forms](https://web3forms.com) 发送到你的邮箱，再由 GitHub Actions 定时拉取并公开展示在文章下方。
+
+### 首次配置
+
+1. 在 Web3Forms 注册并把**接收邮箱**设为你的 Gmail。
+2. 在仓库 **Settings → Secrets and variables → Actions** 添加两个 secret：
+   - `GMAIL_USER`：你的 Gmail 地址
+   - `GMAIL_APP_PASSWORD`：Gmail 应用专用密码（需先开启两步验证）
+3. 之后 `.github/workflows/deploy.yml` 会每 30 分钟自动读取邮箱评论、生成 `comments/comments.json` 并部署。
+
+### 本地手动拉取评论
+
+```bash
+GMAIL_USER=你的邮箱@gmail.com GMAIL_APP_PASSWORD=你的应用密码 \
+  python scripts/fetch_comments.py
+```
+
+评论数据保存在 `comments/comments.json`（由脚本自动生成并提交回仓库）。
