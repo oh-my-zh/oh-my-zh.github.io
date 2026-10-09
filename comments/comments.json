@@ -1,3 +1,32 @@
 {
-  "comments": []
+  "comments": [
+    {
+      "id": "09a8ba8b81ecf2e1539dc924d7be5615309299e5",
+      "name": "匿名访客",
+      "message": "评论",
+      "page": "https://oh-my-zh.cn/works/2026-10-08-start-here.html",
+      "time": "2026-10-09 10:24"
+    },
+    {
+      "id": "41578a91c46aaab939f1d9f84ff13d8ed0aba0bc",
+      "name": "匿名访客",
+      "message": "这是评论内容",
+      "page": "https://oh-my-zh.cn/works/2026-10-08-start-here.html",
+      "time": "2026-10-09 09:02"
+    },
+    {
+      "id": "6034dd8a1312636cffd5e0297bfc32914c91cb79",
+      "name": "匿名访客",
+      "message": "这是留言内容",
+      "page": "https://oh-my-zh.cn/",
+      "time": "2026-10-09 09:02"
+    },
+    {
+      "id": "fd908343ef7fc09b5791754a8dfcf46e89485490",
+      "name": "cdd",
+      "message": "hi",
+      "page": "〔示例〕从这里开始",
+      "time": "2026-10-09 08:36"
+    }
+  ]
 }
