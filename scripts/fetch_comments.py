@@ -234,11 +234,17 @@ def main():
                 subject_text = ""
                 for part, enc in email.header.decode_header(msg.get("Subject") or ""):
                     subject_text += part.decode(enc or "utf-8", errors="replace") if isinstance(part, bytes) else part
+
+                # 调试：打印疑似评论相关的主题，便于定位
+                if any(k in subject_text for k in ("评论", "浅书", "新评论", "留言")) or "new form" in subject_text.lower():
+                    print(f"  [候选主题] {subject_text!r}")
+
                 if SUBJECT_KEYWORD not in subject_text:
                     continue
 
                 fields = parse_fields(extract_plain_text(msg))
                 if not fields.get("message"):
+                    print(f"  [主题匹配但无内容] {subject_text!r} fields={fields!r}")
                     continue
 
                 mid = msg_id(msg)
