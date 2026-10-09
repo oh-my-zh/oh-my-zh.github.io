@@ -27,6 +27,7 @@ const WEB3FORMS_ACCESS_KEY = "4a4975cf-52fe-48fd-bb24-648fc90f2509";
     const payload = Object.fromEntries(data.entries());
     payload.access_key = WEB3FORMS_ACCESS_KEY;
     payload.subject = "【我的浅书】收到一条新评论";
+    payload.page = window.location.href;
     if (!payload.name) payload.name = "匿名访客";
 
     button.disabled = true;
