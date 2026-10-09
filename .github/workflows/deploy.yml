@@ -32,8 +32,8 @@ jobs:
 
       - name: Fetch comments from mailbox
         env:
-          QQ_EMAIL: ${{ secrets.QQ_EMAIL }}
-          QQ_AUTH_CODE: ${{ secrets.QQ_AUTH_CODE }}
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
         run: python scripts/fetch_comments.py
 
       - name: Commit comments

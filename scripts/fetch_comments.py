@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""从 QQ 邮箱读取评论邮件，生成 comments/comments.json 供构建脚本渲染。
+"""从 Gmail 读取评论邮件，生成 comments/comments.json 供构建脚本渲染。
 
 用法：
     python scripts/fetch_comments.py            # 读取未读评论，合并进 comments.json
@@ -7,11 +7,12 @@
 
 配置（二选一，推荐前者，不会进入 git）：
     1. 在 scripts/.env.local 里写两行（该文件已被 .gitignore 忽略）：
-           QQ_EMAIL=你的QQ邮箱@qq.com
-           QQ_AUTH_CODE=你的IMAP授权码
-    2. 或设置环境变量 QQ_EMAIL、QQ_AUTH_CODE
+           GMAIL_USER=你的邮箱@gmail.com
+           GMAIL_APP_PASSWORD=你的应用专用密码
+    2. 或设置环境变量 GMAIL_USER、GMAIL_APP_PASSWORD
 
-IMAP 授权码获取：QQ 邮箱 → 设置 → 账户 → 开启「IMAP/SMTP 服务」→ 生成授权码。
+应用专用密码获取：Google 账号需先开启两步验证，然后在
+「Google 账号 → 安全 → 应用专用密码」为「邮件」生成 16 位应用专用密码。
 """
 import email
 import email.utils
@@ -26,7 +27,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 COMMENTS_FILE = ROOT / "comments" / "comments.json"
 
-IMAP_HOST = "imap.qq.com"
+IMAP_HOST = "imap.gmail.com"
 IMAP_PORT = 993
 SUBJECT_KEYWORD = "收到一条新评论"  # Web3Forms 邮件标题「【我的浅书】收到一条新评论」
 
@@ -45,8 +46,8 @@ def load_config():
             key, _, value = line.partition("=")
             env[key.strip()] = value.strip().strip('"').strip("'")
 
-    mail_addr = os.environ.get("QQ_EMAIL") or env.get("QQ_EMAIL", "").strip()
-    auth_code = os.environ.get("QQ_AUTH_CODE") or env.get("QQ_AUTH_CODE", "").strip()
+    mail_addr = os.environ.get("GMAIL_USER") or env.get("GMAIL_USER", "").strip()
+    auth_code = os.environ.get("GMAIL_APP_PASSWORD") or env.get("GMAIL_APP_PASSWORD", "").strip()
     return mail_addr, auth_code
 
 
@@ -138,7 +139,7 @@ def main():
     mark_read = "--mark-read" in sys.argv
     mail_addr, auth_code = load_config()
     if not mail_addr or not auth_code:
-        print("跳过拉取评论：未配置 QQ_EMAIL / QQ_AUTH_CODE（GitHub secrets 或 scripts/.env.local）")
+        print("跳过拉取评论：未配置 GMAIL_USER / GMAIL_APP_PASSWORD（GitHub secrets 或 scripts/.env.local）")
         sys.exit(0)
 
     comments = load_existing()
