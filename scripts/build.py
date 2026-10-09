@@ -129,17 +129,7 @@ def build():
     index_tpl = (TEMPLATES_DIR / "index.html").read_text(encoding="utf-8")
     work_tpl = (TEMPLATES_DIR / "work.html").read_text(encoding="utf-8")
 
-    # 评论按归属分组
     comments = load_comments()
-    index_comments = []
-    work_comments = {}
-    for c in comments:
-        target = comment_target(c)
-        if target == "index":
-            index_comments.append(c)
-        else:
-            work_comments.setdefault(target, []).append(c)
-
     category_names = [c for c, _ in CATEGORIES]
     works = []
     for md_file in sorted(MARKDOWNS_DIR.rglob("*.md")):
@@ -174,7 +164,7 @@ def build():
             "anchor": anchor,
             "body_html": body_html,
             "url": url,
-            "comments_html": render_comments_html(work_comments.get(url, [])),
+            "comments_html": "",
         }
 
         page = render_work(work, work_tpl)
@@ -182,6 +172,29 @@ def build():
         works.append(work)
 
     works.sort(key=lambda w: w["date"], reverse=True)
+
+    # 评论按归属分组：URL 匹配 → 标题匹配（旧格式）→ 首页兜底
+    index_comments = []
+    work_comments = {}
+    url_to_work = {w["url"]: w for w in works}
+    title_to_work = {w["title"]: w for w in works}
+    for c in comments:
+        target = comment_target(c)
+        if target == "index":
+            index_comments.append(c)
+            continue
+        w = url_to_work.get(target)
+        if w is None:
+            w = title_to_work.get((c.get("page") or "").strip())
+        if w is None:
+            w = title_to_work.get(target)
+        if w is not None:
+            work_comments.setdefault(w["url"], []).append(c)
+        else:
+            index_comments.append(c)
+
+    for w in works:
+        w["comments_html"] = render_comments_html(work_comments.get(w["url"], []))
 
     # 首页「最新发布」列表
     if works:
