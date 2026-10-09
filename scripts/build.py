@@ -164,11 +164,9 @@ def build():
             "anchor": anchor,
             "body_html": body_html,
             "url": url,
+            "out_name": out_name,
             "comments_html": "",
         }
-
-        page = render_work(work, work_tpl)
-        (OUT_DIR / "works" / out_name).write_text(page, encoding="utf-8")
         works.append(work)
 
     works.sort(key=lambda w: w["date"], reverse=True)
@@ -195,6 +193,11 @@ def build():
 
     for w in works:
         w["comments_html"] = render_comments_html(work_comments.get(w["url"], []))
+
+    # 归属完成后，再渲染并写作品页（此时评论已就位）
+    for w in works:
+        page = render_work(w, work_tpl)
+        (OUT_DIR / "works" / w["out_name"]).write_text(page, encoding="utf-8")
 
     # 首页「最新发布」列表
     if works:
