@@ -135,6 +135,31 @@ def save_comments(comments):
     )
 
 
+def list_folders(mail):
+    """列出邮箱里所有文件夹名。"""
+    folders = ["INBOX"]
+    try:
+        status, data = mail.list()
+        if status == "OK":
+            for item in data:
+                if isinstance(item, bytes):
+                    item = item.decode("utf-8", errors="replace")
+                m = re.search(r'"([^"]+)"\s*$', item)
+                if m and m.group(1) and m.group(1) not in folders:
+                    folders.append(m.group(1))
+    except imaplib.IMAP4.error:
+        pass
+    return folders
+
+
+def should_search(folder):
+    """只搜收件箱和垃圾邮件类文件夹，跳过已发送/草稿/回收站等。"""
+    low = folder.lower()
+    if low == "inbox":
+        return True
+    return "spam" in low or "junk" in low or "垃圾" in folder
+
+
 def main():
     mark_read = "--mark-read" in sys.argv
     mail_addr, auth_code = load_config()
@@ -149,62 +174,65 @@ def main():
     mail = imaplib.IMAP4_SSL(IMAP_HOST, IMAP_PORT)
     try:
         mail.login(mail_addr, auth_code)
-        mail.select("INBOX")
 
-        # 优先查未读，失败则查全部并靠 Message-ID 去重
-        status, data = mail.search(None, "UNSEEN")
-        if status != "OK" or not data or not data[0]:
-            status, data = mail.search(None, "ALL")
-        if status != "OK":
-            print("搜索邮件失败")
-            sys.exit(1)
-
-        ids = data[0].split()
-        print(f"找到 {len(ids)} 封待检查邮件")
-
-        for num in ids:
-            status, msg_data = mail.fetch(num, "(RFC822)")
+        for folder in list_folders(mail):
+            if not should_search(folder):
+                continue
+            try:
+                status, _ = mail.select(folder)
+            except imaplib.IMAP4.error:
+                continue
             if status != "OK":
                 continue
-            raw = msg_data[0][1]
-            msg = email.message_from_bytes(raw)
 
-            subject = email.header.decode_header(msg.get("Subject") or "")
-            subject_text = ""
-            for part, enc in subject:
-                if isinstance(part, bytes):
-                    subject_text += part.decode(enc or "utf-8", errors="replace")
-                else:
-                    subject_text += part
-            if SUBJECT_KEYWORD not in subject_text:
+            # 优先查未读，为空则查全部（靠 Message-ID 去重避免重复）
+            status, data = mail.search(None, "UNSEEN")
+            if status != "OK" or not data or not data[0]:
+                status, data = mail.search(None, "ALL")
+            if status != "OK" or not data:
                 continue
 
-            body = extract_plain_text(msg)
-            fields = parse_fields(body)
-            if not fields.get("message"):
-                continue
+            nums = data[0].split()
+            print(f"[{folder}] 待检查 {len(nums)} 封")
 
-            mid = msg_id(msg)
-            if mid in existing_ids:
-                continue
+            for num in nums:
+                status, msg_data = mail.fetch(num, "(RFC822)")
+                if status != "OK":
+                    continue
+                raw = msg_data[0][1]
+                msg = email.message_from_bytes(raw)
 
-            comments.append(
-                {
-                    "id": mid,
-                    "name": fields.get("name") or "匿名访客",
-                    "message": fields.get("message", ""),
-                    "page": fields.get("page", ""),
-                    "time": mail_date(msg),
-                }
-            )
-            existing_ids.add(mid)
-            added += 1
+                subject_text = ""
+                for part, enc in email.header.decode_header(msg.get("Subject") or ""):
+                    subject_text += part.decode(enc or "utf-8", errors="replace") if isinstance(part, bytes) else part
+                if SUBJECT_KEYWORD not in subject_text:
+                    continue
 
-            if mark_read:
-                try:
-                    mail.store(num, "+FLAGS", "\\Seen")
-                except imaplib.IMAP4.error:
-                    pass
+                fields = parse_fields(extract_plain_text(msg))
+                if not fields.get("message"):
+                    continue
+
+                mid = msg_id(msg)
+                if mid in existing_ids:
+                    continue
+
+                comments.append(
+                    {
+                        "id": mid,
+                        "name": fields.get("name") or "匿名访客",
+                        "message": fields.get("message", ""),
+                        "page": fields.get("page", ""),
+                        "time": mail_date(msg),
+                    }
+                )
+                existing_ids.add(mid)
+                added += 1
+
+                if mark_read:
+                    try:
+                        mail.store(num, "+FLAGS", "\\Seen")
+                    except imaplib.IMAP4.error:
+                        pass
     finally:
         try:
             mail.logout()
