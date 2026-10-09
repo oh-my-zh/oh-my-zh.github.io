@@ -4,8 +4,8 @@ on:
   push:
     branches: [main]
   schedule:
-    # 每 30 分钟自动拉取一次评论并部署（UTC 时间）
-    - cron: "*/30 * * * *"
+    # 每天自动拉取一次评论并部署（UTC 0:00 = 北京时间 8:00）
+    - cron: "0 0 * * *"
   workflow_dispatch:
 
 permissions:
