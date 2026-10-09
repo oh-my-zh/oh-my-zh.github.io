@@ -3,10 +3,13 @@ name: Deploy site
 on:
   push:
     branches: [main]
+  schedule:
+    # 每 30 分钟自动拉取一次评论并部署（UTC 时间）
+    - cron: "*/30 * * * *"
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write  # 需要写权限，用于把 comments/comments.json 提交回仓库
   pages: write
   id-token: write
 
@@ -26,6 +29,26 @@ jobs:
 
       - name: Install dependencies
         run: pip install -r scripts/requirements.txt
+
+      - name: Fetch comments from mailbox
+        env:
+          QQ_EMAIL: ${{ secrets.QQ_EMAIL }}
+          QQ_AUTH_CODE: ${{ secrets.QQ_AUTH_CODE }}
+        run: python scripts/fetch_comments.py
+
+      - name: Commit comments
+        run: |
+          if [ -f comments/comments.json ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add comments/comments.json
+            if git diff --cached --quiet; then
+              echo "无新评论，跳过提交"
+            else
+              git commit -m "chore: 更新评论数据"
+              git push
+            fi
+          fi
 
       - name: Build site
         run: python scripts/build.py

@@ -386,3 +386,48 @@ h2 {
     grid-template-columns: 1fr;
   }
 }
+
+/* 已收到的评论列表 */
+.comment-list {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+.comment-item {
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.comment-item-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.comment-item-name {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.comment-item-time {
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.comment-item-body {
+  margin: 0;
+  color: var(--text);
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  font-size: 0.95rem;
+}
+
+.comment-form-title {
+  margin: 0 0 12px;
+  font-size: 1.1rem;
+}

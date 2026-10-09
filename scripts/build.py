@@ -7,11 +7,15 @@
 产物输出到 _site/，可直接用 GitHub Pages 部署，或本地
     python3 -m http.server 8000 --directory _site
 预览。
+
+评论数据来自 comments/comments.json（由 scripts/fetch_comments.py 生成）。
 """
 import html
+import json
 import re
 import shutil
 from pathlib import Path
+from urllib.parse import urlparse
 
 import markdown
 import yaml
@@ -21,6 +25,7 @@ MARKDOWNS_DIR = ROOT / "markdowns"
 TEMPLATES_DIR = ROOT / "templates"
 ASSETS_DIR = ROOT / "assets"
 OUT_DIR = ROOT / "_site"
+COMMENTS_FILE = ROOT / "comments" / "comments.json"
 
 SITE_NAME = "我的浅书"
 SITE_DESC = "这里发布浅书的故事、随笔与杂记。"
@@ -56,6 +61,47 @@ def parse_markdown(text: str):
     return {}, text
 
 
+def load_comments():
+    """读取评论数据，返回 list；文件不存在或损坏时返回空列表。"""
+    if not COMMENTS_FILE.exists():
+        return []
+    try:
+        data = json.loads(COMMENTS_FILE.read_text(encoding="utf-8"))
+        return data.get("comments", []) if isinstance(data, dict) else []
+    except (json.JSONDecodeError, OSError):
+        return []
+
+
+def comment_target(comment: dict):
+    """评论归属：'index' 表示首页，否则是作品相对 url（如 'works/xxx.html'）。"""
+    page = comment.get("page", "")
+    path = urlparse(page).path.strip("/")
+    if path in ("", "index.html"):
+        return "index"
+    return path
+
+
+def render_comments_html(comments):
+    """把评论列表渲染成 HTML 片段。"""
+    if not comments:
+        return '<p class="empty-state">还没有评论，来抢沙发～</p>'
+    items = []
+    for c in comments:
+        name = html.escape(c.get("name") or "匿名访客")
+        msg = html.escape(c.get("message") or "")
+        t = html.escape(c.get("time") or "")
+        items.append(
+            '<div class="comment-item">'
+            '<div class="comment-item-head">'
+            f'<span class="comment-item-name">{name}</span>'
+            f'<span class="comment-item-time">{t}</span>'
+            '</div>'
+            f'<p class="comment-item-body">{msg}</p>'
+            '</div>'
+        )
+    return "\n".join(items)
+
+
 def render_work(work: dict, template: str) -> str:
     return (
         template
@@ -66,6 +112,7 @@ def render_work(work: dict, template: str) -> str:
         .replace("{{CAT_ANCHOR}}", work["anchor"])
         .replace("{{SUMMARY}}", html.escape(work["summary"]))
         .replace("{{CONTENT}}", work["body_html"])
+        .replace("{{COMMENTS}}", work.get("comments_html", ""))
     )
 
 
@@ -81,6 +128,17 @@ def build():
 
     index_tpl = (TEMPLATES_DIR / "index.html").read_text(encoding="utf-8")
     work_tpl = (TEMPLATES_DIR / "work.html").read_text(encoding="utf-8")
+
+    # 评论按归属分组
+    comments = load_comments()
+    index_comments = []
+    work_comments = {}
+    for c in comments:
+        target = comment_target(c)
+        if target == "index":
+            index_comments.append(c)
+        else:
+            work_comments.setdefault(target, []).append(c)
 
     category_names = [c for c, _ in CATEGORIES]
     works = []
@@ -104,6 +162,9 @@ def build():
 
         anchor = next((a for c, a in CATEGORIES if c == category), "cat-suibi")
 
+        out_name = f"{date}-{slug}.html" if date else f"{slug}.html"
+        url = f"works/{out_name}"
+
         work = {
             "date": date or "",
             "slug": slug,
@@ -112,12 +173,12 @@ def build():
             "summary": summary,
             "anchor": anchor,
             "body_html": body_html,
+            "url": url,
+            "comments_html": render_comments_html(work_comments.get(url, [])),
         }
 
-        out_name = f"{date}-{slug}.html" if date else f"{slug}.html"
         page = render_work(work, work_tpl)
         (OUT_DIR / "works" / out_name).write_text(page, encoding="utf-8")
-        work["url"] = f"works/{out_name}"
         works.append(work)
 
     works.sort(key=lambda w: w["date"], reverse=True)
@@ -161,10 +222,11 @@ def build():
         .replace("{{SITE_DESC}}", SITE_DESC)
         .replace("{{LATEST}}", latest_html)
         .replace("{{CATEGORIES}}", categories_html)
+        .replace("{{COMMENTS}}", render_comments_html(index_comments))
     )
     (OUT_DIR / "index.html").write_text(page, encoding="utf-8")
 
-    print(f"构建完成：{len(works)} 篇作品 → {OUT_DIR}")
+    print(f"构建完成：{len(works)} 篇作品，{len(comments)} 条评论 → {OUT_DIR}")
 
 
 if __name__ == "__main__":
