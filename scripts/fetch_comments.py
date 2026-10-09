@@ -166,8 +166,10 @@ def decode_mutf7(name):
             if j == i + 1:
                 out.append("&")
             else:
+                b64 = name[i + 1:j]
+                b64 += "=" * ((-len(b64)) % 4)  # 补回被省略的 base64 padding
                 try:
-                    raw = base64.b64decode(name[i + 1:j])
+                    raw = base64.b64decode(b64)
                     out.append(raw.decode("utf-16-be", errors="replace"))
                 except Exception:
                     out.append(name[i:j + 1])
