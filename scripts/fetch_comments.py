@@ -14,6 +14,7 @@
 应用专用密码获取：Google 账号需先开启两步验证，然后在
 「Google 账号 → 安全 → 应用专用密码」为「邮件」生成 16 位应用专用密码。
 """
+import base64
 import email
 import email.utils
 import hashlib
@@ -152,12 +153,38 @@ def list_folders(mail):
     return folders
 
 
+def decode_mutf7(name):
+    """解码 IMAP 的 modified UTF-7 文件夹名（Gmail 中文名会编码成 &xxx-）。"""
+    out = []
+    i = 0
+    while i < len(name):
+        if name[i] == "&":
+            j = name.find("-", i)
+            if j == -1:
+                out.append(name[i:])
+                break
+            if j == i + 1:
+                out.append("&")
+            else:
+                try:
+                    raw = base64.b64decode(name[i + 1:j])
+                    out.append(raw.decode("utf-16-be", errors="replace"))
+                except Exception:
+                    out.append(name[i:j + 1])
+            i = j + 1
+        else:
+            out.append(name[i])
+            i += 1
+    return "".join(out)
+
+
 def should_search(folder):
     """只搜收件箱和垃圾邮件类文件夹，跳过已发送/草稿/回收站等。"""
-    low = folder.lower()
+    name = decode_mutf7(folder)
+    low = name.lower()
     if low == "inbox":
         return True
-    return "spam" in low or "junk" in low or "垃圾" in folder
+    return "spam" in low or "junk" in low or "垃圾" in name
 
 
 def main():
